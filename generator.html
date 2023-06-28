@@ -1,0 +1,125 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Custom UTF-8 Barcode Coder</title>
+	<meta charset="UTF-8">
+</head>
+<body>
+	<p>
+		This is capable of encoding strings containing numbers and non-accented english uppercase letters. Numbers smaller than 256 will be padded with leading zeros to take up eight characters of space.
+
+		Disallowed characters will simply be omitted from the encoding.
+
+		This is capable of decoding strings produced by this encoding.
+
+		Leading zeros of numbers will be dropped when decoded.
+	</p>
+	<div>
+		<label for="idecoded">String to Encode:</label>
+		<input type="text" name="idecoded" onkeypress="listener_encode(event)">
+		<button onclick="listener_encode(event)">Encode</button>
+	</div>
+	<div>
+		<label for="iencoded">String to Decode:</label>
+		<input type="text" name="iencoded" onkeypress="listener_decode(event)">
+		<button onclick="listener_decode(event)">Decode</button>
+	</div>
+	<h1 id="out"></h1>
+</body>
+<script type="text/javascript">
+	function listener_encode(event){
+		if (event.key == "Enter" || event.type == "click"){
+			encode(document.getElementsByName("idecoded")[0].value );
+		}
+	}
+
+	function listener_decode(event){
+		if (event.key == "Enter" || event.type == "click"){
+			decode(document.getElementsByName("iencoded")[0].value );
+		}
+	}
+
+	function encode(decoded){
+		encoded = []
+		entries = decoded.toString().toUpperCase().match(/([A-Z]{1,}|[0-9]{1,})/g)
+		console.log(entries)
+		for (i = 0; i<entries.length; i++){
+			e = entries[i]
+			if (parseInt(e) || parseInt(e) == 0){
+				console.log(e)
+				s = parseInt(e).toString(2).replaceAll('0','▚').replaceAll('1','▞')
+				s = s.padStart(8,'▚')
+				console.log(s)
+			}
+			else{
+				s = ""
+				for (j = 0; j<e.length; j++){
+					s = s + {
+						"A": "▝▝",
+						"B": "▝▙",
+						"C": "▝▘",
+						"D": "▝▟",
+						"E": "▝▖",
+						"F": "▝▜",
+						"G": "▝▗",
+						"H": "▝▛",
+						"I": "▙▝",
+						"J": "▙▙",
+						"K": "▙▘",
+						"L": "▙▟",
+						"M": "▙▖",
+						"N": "▙▜",
+						"O": "▙▗",
+						"P": "▙▛",
+						"Q": "▘▝",
+						"R": "▘▙",
+						"S": "▘▘",
+						"T": "▘▟",
+						"U": "▘▖",
+						"V": "▘▜",
+						"W": "▘▗",
+						"X": "▘▛",
+						"Y": "▟▝",
+						"Z": "▟▙"
+					}[e[j]]
+				}
+			}
+			encoded.push(s)
+		}
+		document.getElementById("out").innerHTML = "Encoded: " + "▌" + encoded.join("▐▌") + "▐";
+	}
+
+	function decode(coded){
+		decoded = []
+		entries = coded.match(/[^▌▐]{1,}/g)
+		for (i = 0; i<entries.length; i++){
+			e = entries[i]
+			if (['▚','▞'].includes(e[0])){
+				e = e.replaceAll('▚','0').replaceAll('▞','1')
+				s = parseInt(e,2)
+			}
+			else{
+				blocks = e.match(/.{2}/g)
+				s = ""
+				for (j = 0; j<blocks.length; j++){
+					d = {
+						'▝': "000",
+						'▙': "001",
+						'▘': "010",
+						'▟': "011",
+						'▖': "100",
+						'▜': "101",
+						'▗': "110",
+						'▛': "111"
+					}
+					b = blocks[j]
+					n = parseInt(d[b[0]] + d[b[1]], 2)
+					s = s + "ABCDEFGHIJKLMNOPQRSTUVWXYZ"[n]
+				}
+			}
+			decoded.push(s)
+		}
+		document.getElementById("out").innerHTML = "Decoded: " + decoded.join("-");
+	}
+</script>
+</html>
